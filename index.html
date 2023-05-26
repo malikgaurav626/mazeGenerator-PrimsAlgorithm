@@ -19,7 +19,7 @@
 </head>
 
 <body>
-  <div class="matrix">
+  <div class="matrix" style="text-align: center;">
     <label for="rows">Rows:</label>
     <input type="number" id="rows" min="1" value="3">
     <label for="cols">Columns:</label>
@@ -39,43 +39,7 @@
       var rows = parseInt(document.getElementById('rows').value);
       var cols = parseInt(document.getElementById('cols').value);
 
-      // Get the matrix container element
-      var matrixContainer = document.getElementById('matrix-container');
-
-      // Clear the matrix container
-      matrixContainer.innerHTML = '';
-
-      // Calculate the size of each element box based on the number of rows and columns
-      var boxSize = Math.floor(600 / Math.max(rows, cols));
-
-      // Create the matrix
-      var matrix = document.createElement('div');
-      matrix.id = 'matrix';
-      matrix.style.border = '1px solid #000';
-      matrix.style.maxWidth = '600px'; // Set fixed width to 600px
-
-      // Set the CSS grid properties
-      matrix.style.display = 'grid';
-      matrix.style.gridTemplateColumns = `repeat(${cols}, ${boxSize}px)`;
-      matrix.style.gridTemplateRows = `repeat(${rows}, ${boxSize}px)`;
-      matrix.style.gridGap = '1px';
-
-      // Create the matrix elements
-      var count = 1;
-      for (var i = 0; i < rows; i++) {
-        for (var j = 0; j < cols; j++) {
-          var element = document.createElement('div');
-          element.id = `element-${count}`;
-          element.className = 'matrix-element';
-          element.style.border = '1px solid #000';
-          element.style.padding = '10px';
-          matrix.appendChild(element);
-          count++;
-        }
-      }
-
-      // Append the matrix to the container
-      matrixContainer.appendChild(matrix);
+      
 
       let maze = new Maze(rows, cols);
       maze.generate();
@@ -237,27 +201,41 @@
         }
       }
       breakWall(inside_maze, frontier_outside_maze) {
-        if (inside_maze.row < frontier_outside_maze.row) {
+        const dx = inside_maze.col - frontier_outside_maze.col;
+        const dy = inside_maze.row - frontier_outside_maze.row;
+
+        if (dx === 1) {
+          // Break the right wall of inside_maze and the left wall of frontier_outside_maze
+          this.mat[inside_maze.row][inside_maze.col].left = 0;
+          this.mat[frontier_outside_maze.row][frontier_outside_maze.col].right = 0;
+        } else if (dx === -1) {
+          // Break the left wall of inside_maze and the right wall of frontier_outside_maze
+          this.mat[inside_maze.row][inside_maze.col].right = 0;
+          this.mat[frontier_outside_maze.row][frontier_outside_maze.col].left = 0;
+        } else if (dy === 1) {
+          // Break the bottom wall of inside_maze and the top wall of frontier_outside_maze
+          this.mat[inside_maze.row][inside_maze.col].top = 0;
+          this.mat[frontier_outside_maze.row][frontier_outside_maze.col].bottom = 0;
+        } else if (dy === -1) {
+          // Break the top wall of inside_maze and the bottom wall of frontier_outside_maze
           this.mat[inside_maze.row][inside_maze.col].bottom = 0;
           this.mat[frontier_outside_maze.row][frontier_outside_maze.col].top = 0;
         }
-        else if (inside_maze.row > frontier_outside_maze.row) {
-          this.mat[inside_maze.row][inside_maze.col].top = 0;
-          this.mat[frontier_outside_maze.row][frontier_outside_maze.col].bottom = 0;
-        } else if (inside_maze.col < frontier_outside_maze.col) {
-          this.mat[inside_maze.row][inside_maze.col].right = 0;
-          this.mat[frontier_outside_maze.row][frontier_outside_maze.col].left = 0;
-        } else if (inside_maze.col > frontier_outside_maze.col) {
-          this.mat[inside_maze.row][inside_maze.col].left = 0;
-          this.mat[frontier_outside_maze.row][frontier_outside_maze.col].right = 0;
-        }
       }
+
       addFrontier(frontier_neighbors, frontier) {
         for (let neighbor of frontier_neighbors) {
           if (this.mat[neighbor.row][neighbor.col].v === 0) {
             frontier.push(neighbor);
           }
         }
+      }
+      shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
       }
       generate() {
         let random_point = new pair(); //creates index of a random cell each time it is executed
@@ -266,6 +244,7 @@
         this.mat[random_point.row][random_point.col].v = 1; //first cell in the maze
         let frontier = this.neighbors(random_point); //all the neighbors of current cell
         while (frontier.length > 0) {
+          this.shuffle(frontier);
           let random_frontier_index = new pair();
           let index = Math.floor(Math.random() * frontier.length);
           random_frontier_index = frontier[index];
@@ -301,40 +280,43 @@
 
       }
       display() {
-        const mazeContainer = document.getElementById('matrix-container');
+        const existingCanvas = document.querySelector('canvas');
+        if (existingCanvas) {
+          existingCanvas.parentNode.removeChild(existingCanvas);
+        }
+        let canvas = document.createElement("canvas");
+        canvas.style.marginLeft = "25em";
+        canvas.style.marginTop = "20px";
+        canvas.width = this.cols * 20;
+        canvas.height = this.rows * 20;
+        let context = canvas.getContext("2d");
+        context.beginPath();
 
-        let count = 1;
-        for (let i = 0; i < this.rows; i++) {
-          for (let j = 0; j < this.cols; j++) {
-            const mazeCell = document.getElementById('element-' + count);
-            if (this.mat[i][j].top === 0) {
-              mazeCell.style.borderTop = 'none';
+        for (let row = 0; row < this.rows; row++) {
+          for (let col = 0; col < this.cols; col++) {
+            let cell = this.mat[row][col];
+
+            if (cell.top) {
+              context.moveTo(col * 20, row * 20);
+              context.lineTo((col + 1) * 20, row * 20);
             }
-            else {
-              mazeCell.style.borderTop = '1px solid #000';
+            if (cell.right) {
+              context.moveTo((col + 1) * 20, row * 20);
+              context.lineTo((col + 1) * 20, (row + 1) * 20);
             }
-            if (this.mat[i][j].bottom === 0) {
-              mazeCell.style.borderBottom = 'none';
+            if (cell.bottom) {
+              context.moveTo((col + 1) * 20, (row + 1) * 20);
+              context.lineTo(col * 20, (row + 1) * 20);
             }
-            else {
-              mazeCell.style.borderBottom = '1px solid #000';
+            if (cell.left) {
+              context.moveTo(col * 20, (row + 1) * 20);
+              context.lineTo(col * 20, row * 20);
             }
-            if (this.mat[i][j].left === 0) {
-              mazeCell.style.borderLeft = 'none';
-            }
-            else {
-              mazeCell.style.borderLeft = '1px solid #000';
-            }
-            if (this.mat[i][j].right === 0) {
-              mazeCell.style.borderRight = 'none';
-            }
-            else {
-              mazeCell.style.borderRight = '1px solid #000';
-            }
-            count++;
           }
         }
 
+        context.stroke();
+        document.body.appendChild(canvas);
       }
     }
   </script>
