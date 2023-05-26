@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="col-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <style>
+    #matrix-container {
+      max-width: 100%;
+      /* Set initial width to 50% */
+    }
+
+    .matrix-element {
+      background-color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="matrix">
+    <label for="rows">Rows:</label>
+    <input type="number" id="rows" min="1" value="3">
+    <label for="cols">Columns:</label>
+    <input type="number" id="cols" min="1" value="3">
+
+    <button onclick="createMatrix()">Create Matrix</button>
+
+    <div id="matrix-container"></div>
+
+  </div>
+
+  </div>
+  <script>
+
+    function createMatrix() {
+      // Get the dimensions from the input fields
+      var rows = parseInt(document.getElementById('rows').value);
+      var cols = parseInt(document.getElementById('cols').value);
+
+      // Get the matrix container element
+      var matrixContainer = document.getElementById('matrix-container');
+
+      // Clear the matrix container
+      matrixContainer.innerHTML = '';
+
+      // Calculate the size of each element box based on the number of rows and columns
+      var boxSize = Math.floor(600 / Math.max(rows, cols));
+
+      // Create the matrix
+      var matrix = document.createElement('div');
+      matrix.id = 'matrix';
+      matrix.style.border = '1px solid #000';
+      matrix.style.maxWidth = '600px'; // Set fixed width to 600px
+
+      // Set the CSS grid properties
+      matrix.style.display = 'grid';
+      matrix.style.gridTemplateColumns = `repeat(${cols}, ${boxSize}px)`;
+      matrix.style.gridTemplateRows = `repeat(${rows}, ${boxSize}px)`;
+      matrix.style.gridGap = '1px';
+
+      // Create the matrix elements
+      var count = 1;
+      for (var i = 0; i < rows; i++) {
+        for (var j = 0; j < cols; j++) {
+          var element = document.createElement('div');
+          element.id = `element-${count}`;
+          element.className = 'matrix-element';
+          element.style.border = '1px solid #000';
+          element.style.padding = '10px';
+          matrix.appendChild(element);
+          count++;
+        }
+      }
+
+      // Append the matrix to the container
+      matrixContainer.appendChild(matrix);
+
+      let maze = new Maze(rows, cols);
+      maze.generate();
+      maze.display();
+    }
+
+
+
+    class pair {
+      constructor() {
+        this.col = 0;
+        this.row = 0;
+      }
+    }
+    class maze_element {
+      constructor() {
+        this.top = 1;
+        this.bottom = 1;
+        this.left = 1;
+        this.right = 1;
+        this.v = 0;
+      }
+    }
+    class Maze {
+      constructor(rows, cols) {
+        this.mat = [];
+        this.rows = rows;
+        this.cols = cols;
+        for (let i = 0; i < rows; i++) {
+          this.mat[i] = [];
+        }
+        let count = 0;
+        for (let i = 0; i < rows; i++) {
+          for (let j = 0; j < cols; j++) {
+            this.mat[i][j] = new maze_element();
+          }
+        }
+      }
+      neighbors(random_point) {
+        let neighbor = [];
+        let col = random_point.col,
+          row = random_point.row;
+        if (row == 0 && col == 0) {
+          let temp = new pair();
+          temp.col = col + 1;
+          temp.row = row;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col;
+          temp.row = row + 1;
+          neighbor.push(temp);
+        } else if (row == 0 && col == this.cols - 1) {
+          let temp = new pair();
+          temp.col = col;
+          temp.row = row + 1;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col - 1;
+          temp.row = row;
+          neighbor.push(temp);
+        } else if (row == this.rows - 1 && col == 0) {
+          let temp = new pair();
+          temp.col = col + 1;
+          temp.row = row;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col;
+          temp.row = row - 1;
+          neighbor.push(temp);
+        } else if (row == this.rows - 1 && col == this.cols - 1) {
+          let temp = new pair();
+          temp.col = col;
+          temp.row = row - 1;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col - 1;
+          temp.row = row;
+          neighbor.push(temp);
+        } else if (row == 0 && col != 0) {
+          let temp = new pair();
+          temp.col = col + 1;
+          temp.row = row;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col - 1;
+          temp.row = row;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col;
+          temp.row = row + 1;
+          neighbor.push(temp);
+        } else if (row != 0 && col == 0) {
+          let temp = new pair();
+          temp.col = col;
+          temp.row = row - 1;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col;
+          temp.row = row + 1;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col + 1;
+          temp.row = row;
+          neighbor.push(temp);
+        } else if (row == this.rows - 1 && col != 0) {
+          let temp = new pair();
+          temp.col = col + 1;
+          temp.row = row;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col - 1;
+          temp.row = row;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col;
+          temp.row = row - 1;
+          neighbor.push(temp);
+        } else if (row != this.rows - 1 && col == this.cols - 1) {
+          let temp = new pair();
+          temp.col = col;
+          temp.row = row - 1;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col;
+          temp.row = row + 1;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col - 1;
+          temp.row = row;
+          neighbor.push(temp);
+        } else {
+          let temp = new pair();
+          temp.col = col;
+          temp.row = row - 1;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col;
+          temp.row = row + 1;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col - 1;
+          temp.row = row;
+          neighbor.push(temp);
+          temp = new pair();
+          temp.col = col + 1;
+          temp.row = row;
+          neighbor.push(temp);
+        }
+        return neighbor;
+      }
+      getAdjacentIn(neighbors) {
+        let newPair = new pair();
+        for (let neighbor of neighbors) {
+          if (this.mat[neighbor.row][neighbor.col].v === 1) {
+            newPair.col = neighbor.col;
+            newPair.row = neighbor.row;
+            return newPair;
+          }
+        }
+      }
+      breakWall(inside_maze, frontier_outside_maze) {
+        if (inside_maze.row < frontier_outside_maze.row) {
+          this.mat[inside_maze.row][inside_maze.col].bottom = 0;
+          this.mat[frontier_outside_maze.row][frontier_outside_maze.col].top = 0;
+        }
+        else if (inside_maze.row > frontier_outside_maze.row) {
+          this.mat[inside_maze.row][inside_maze.col].top = 0;
+          this.mat[frontier_outside_maze.row][frontier_outside_maze.col].bottom = 0;
+        } else if (inside_maze.col < frontier_outside_maze.col) {
+          this.mat[inside_maze.row][inside_maze.col].right = 0;
+          this.mat[frontier_outside_maze.row][frontier_outside_maze.col].left = 0;
+        } else if (inside_maze.col > frontier_outside_maze.col) {
+          this.mat[inside_maze.row][inside_maze.col].left = 0;
+          this.mat[frontier_outside_maze.row][frontier_outside_maze.col].right = 0;
+        }
+      }
+      addFrontier(frontier_neighbors, frontier) {
+        for (let neighbor of frontier_neighbors) {
+          if (this.mat[neighbor.row][neighbor.col].v === 0) {
+            frontier.push(neighbor);
+          }
+        }
+      }
+      generate() {
+        let random_point = new pair(); //creates index of a random cell each time it is executed
+        random_point.col = Math.floor(Math.random() * this.cols);
+        random_point.row = Math.floor(Math.random() * this.rows);
+        this.mat[random_point.row][random_point.col].v = 1; //first cell in the maze
+        let frontier = this.neighbors(random_point); //all the neighbors of current cell
+        while (frontier.length > 0) {
+          let random_frontier_index = new pair();
+          let index = Math.floor(Math.random() * frontier.length);
+          random_frontier_index = frontier[index];
+          let frontier_neighbors = this.neighbors(random_frontier_index);
+
+
+
+          //continue here 26 may 2023
+
+
+
+          //adjacent cell is already part of the maze.
+          let adjacent_cell = new pair();
+          adjacent_cell = this.getAdjacentIn(frontier_neighbors);
+
+          if (adjacent_cell) {
+            //breaks the wall b/w adjacent cell and frontier cell.
+            this.breakWall(adjacent_cell, random_frontier_index);
+
+
+
+
+            //mark the frontier cell as visited using .v;
+            this.mat[random_frontier_index.row][random_frontier_index.col].v = 1;
+
+            //add the neighbors of random frontier cell to frontier list.
+            this.addFrontier(frontier_neighbors, frontier);
+          }
+
+          //remove the random frontier cell from the frontier list.
+          frontier.splice(frontier.indexOf(random_frontier_index), 1);
+        }
+
+      }
+      display() {
+        const mazeContainer = document.getElementById('matrix-container');
+
+        let count = 1;
+        for (let i = 0; i < this.rows; i++) {
+          for (let j = 0; j < this.cols; j++) {
+            const mazeCell = document.getElementById('element-' + count);
+            if (this.mat[i][j].top === 0) {
+              mazeCell.style.borderTop = 'none';
+            }
+            else {
+              mazeCell.style.borderTop = '1px solid #000';
+            }
+            if (this.mat[i][j].bottom === 0) {
+              mazeCell.style.borderBottom = 'none';
+            }
+            else {
+              mazeCell.style.borderBottom = '1px solid #000';
+            }
+            if (this.mat[i][j].left === 0) {
+              mazeCell.style.borderLeft = 'none';
+            }
+            else {
+              mazeCell.style.borderLeft = '1px solid #000';
+            }
+            if (this.mat[i][j].right === 0) {
+              mazeCell.style.borderRight = 'none';
+            }
+            else {
+              mazeCell.style.borderRight = '1px solid #000';
+            }
+            count++;
+          }
+        }
+
+      }
+    }
+  </script>
+</body>
+
+</html>
