@@ -1,4 +1,4 @@
-# mazeGenerator- (kinda) PrimsAlgorithm
+# mazeGenerator - using PrimsAlgorithm
 it generates random mazes using prims algo
 (add random in and outs)
 (there is always one solution from (start block) to (final block) which can be chosen by you.)
