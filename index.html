@@ -2,272 +2,286 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="col-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        #matrix-container {
-            max-width: 100%;
-            /* Set initial width to 50% */
+        table {
+            border-collapse: collapse;
         }
 
-        .matrix-element {
-            background-color: #fff;
+        td {
+            border: 1px solid black;
+            padding: 5px;
+        }
+
+        .matrix-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        #table-id {
+            text-align: center;
+            border: 1px solid black;
+        }
+
+        .matrix {
+            margin-top: 30px;
         }
     </style>
 </head>
 
 <body>
-    <div class="matrix" style="text-align: center;">
+    <div class="matrix" style="text-align: center">
         <label for="rows">Rows:</label>
-        <input type="number" id="rows" min="1" value="3">
+        <input type="number" id="rows" min="1" value="3" />
         <label for="cols">Columns:</label>
-        <input type="number" id="cols" min="1" value="3">
+        <input type="number" id="cols" min="1" value="3" />
 
-        <button onclick="createMatrix()">Generate Maze</button>
-
-        <div id="matrix-container"></div>
-
+        <button onclick="createMatrix()">Generate Matrix</button>
+        <div class="matrix-container" id="matrix-container">
+        </div>
     </div>
 
-    </div>
     <script>
-
         function createMatrix() {
             // Get the dimensions from the input fields
-            var rows = parseInt(document.getElementById('rows').value);
-            var cols = parseInt(document.getElementById('cols').value);
+            var rows = parseInt(document.getElementById("rows").value);
+            var cols = parseInt(document.getElementById("cols").value);
 
-
-
+            let container = document.getElementById("matrix-container");
+            container.innerHTML = "";
+            container.style.cssText = `text-align: center; border-collapse:collapse;`;
+            let newElement = document.createElement("table");
+            newElement.id = "table-id";
+            newElement.style.cssText = "border 1px solid black";
+            container.appendChild(newElement);
+            for (let i = 0; i < rows; i++) {
+                addRow(i);
+                for (let j = 0; j < cols; j++) {
+                    addCol(i, j);
+                }
+            }
             let maze = new Maze(rows, cols);
             maze.generate();
             maze.display();
         }
-
-
-
-        class pair {
+        function addRow(i) {
+            let container = document.getElementById("table-id");
+            let newElement = document.createElement("tr");
+            newElement.classList.add("table-row");
+            newElement.id = `t-row-${i}`;
+            container.appendChild(newElement);
+        }
+        function addCol(i, j) {
+            let container = document.getElementById("t-row-" + i);
+            let newElement = document.createElement("td");
+            newElement.classList.add("table-data");
+            newElement.id = `t-data-${i}-${j}`;
+            newElement.style.cssText = `border: 1px solid black; padding: 5px;`;
+            container.appendChild(newElement);
+        }
+        class matrix_element {
             constructor() {
-                this.col = 0;
-                this.row = 0;
+                this.top = true;
+                this.bottom = true;
+                this.left = true;
+                this.right = true;
+                this.visited = false;
+                this.frontier = false;
             }
         }
-        class maze_element {
+        class cords {
             constructor() {
-                this.top = 1;
-                this.bottom = 1;
-                this.left = 1;
-                this.right = 1;
-                this.v = 0;
+                this.row = 0;
+                this.col = 0;
+            }
+            give_cords() {
+                let cordinates = [];
+                cordinates.push(this.row);
+                conrdinates.push(this.col);
+                return cordinates;
             }
         }
         class Maze {
             constructor(rows, cols) {
-                this.mat = [];
                 this.rows = rows;
                 this.cols = cols;
+                this.matrix = [];
                 for (let i = 0; i < rows; i++) {
-                    this.mat[i] = [];
+                    this.matrix[i] = [];
                 }
-                let count = 0;
                 for (let i = 0; i < rows; i++) {
                     for (let j = 0; j < cols; j++) {
-                        this.mat[i][j] = new maze_element();
+                        this.matrix[i][j] = new matrix_element();
                     }
                 }
             }
-            neighbors(random_point) {
-                let neighbor = [];
-                let col = random_point.col;
-                let row = random_point.row;
-
+            adjacent_cells(random_cell) {
+                let cellList = [];
+                let row = random_cell.row;
+                let col = random_cell.col;
                 if (row > 0) {
-                    let temp = new pair();
+                    let temp = new cords();
                     temp.col = col;
                     temp.row = row - 1;
-                    neighbor.push(temp);
+                    cellList.push(temp);
                 }
-
-                // Corrected condition here
                 if (row < this.rows - 1) {
-                    let temp = new pair();
+                    let temp = new cords();
                     temp.col = col;
                     temp.row = row + 1;
-                    neighbor.push(temp);
+                    cellList.push(temp);
                 }
-
                 if (col < this.cols - 1) {
-                    let temp = new pair();
+                    let temp = new cords();
                     temp.col = col + 1;
                     temp.row = row;
-                    neighbor.push(temp);
+                    cellList.push(temp);
                 }
-
                 if (col > 0) {
-                    let temp = new pair();
+                    let temp = new cords();
                     temp.col = col - 1;
                     temp.row = row;
-                    neighbor.push(temp);
+                    cellList.push(temp);
                 }
 
-                return neighbor;
+                return cellList;
             }
-            getAdjacentIn(neighbors) {
-                let newPair = new pair();
-                for (let neighbor of neighbors) {
-                    if (this.mat[neighbor.row][neighbor.col].v === 1) {
-                        newPair.col = neighbor.col;
-                        newPair.row = neighbor.row;
-                        return newPair;
+            addToFrontier(cellList) {
+                for (let ele of cellList) {
+                    if (this.matrix[ele.row][ele.col].visited === false) {
+                        this.matrix[ele.row][ele.col].frontier = true;
                     }
                 }
             }
-            getWall(cell1, cell2) {
-                if (cell1.row < cell2.row) {
-                    return 'bottom';
-                } else if (cell1.row > cell2.row) {
-                    return 'top';
-                } else if (cell1.col < cell2.col) {
-                    return 'right';
-                } else if (cell1.col > cell2.col) {
-                    return 'left';
-                }
-            }
-            getOppositeWall(wall) {
-                if (wall === 'top') {
-                    return 'bottom';
-                } else if (wall === 'right') {
-                    return 'left';
-                } else if (wall === 'bottom') {
-                    return 'top';
-                } else if (wall === 'left') {
-                    return 'right';
-                }
-            }
-            breakWall(inside_maze, frontier_outside_maze) {
-
-                let wall = this.getWall(inside_maze, frontier_outside_maze);
-                let oppWall = this.getOppositeWall(wall);
-                if (wall === 'top' && oppWall === 'bottom') {
-                    this.mat[inside_maze.row][inside_maze.col].top = 0;
-                    this.mat[frontier_outside_maze.row][frontier_outside_maze.col].bottom = 0;
-                }
-                if (wall === 'bottom' && oppWall === 'top') {
-                    this.mat[inside_maze.row][inside_maze.col].bottom = 0;
-                    this.mat[frontier_outside_maze.row][frontier_outside_maze.col].top = 0;
-                }
-                if (wall === 'left' && oppWall === 'right') {
-                    this.mat[inside_maze.row][inside_maze.col].left = 0;
-                    this.mat[frontier_outside_maze.row][frontier_outside_maze.col].right = 0;
-                }
-                if (wall === 'right' && oppWall === 'left') {
-                    this.mat[inside_maze.row][inside_maze.col].right = 0;
-                    this.mat[frontier_outside_maze.row][frontier_outside_maze.col].left = 0;
-                }
-                return null;
-            }
-            addFrontier(frontier_neighbors, frontier) {
-                for (let neighbor of frontier_neighbors) {
-                    if (this.mat[neighbor.row][neighbor.col].v === 0) {
-                        frontier.push(neighbor);
+            getFrontierSet() {
+                let frontierSet = [];
+                for (let i = 0; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols; j++) {
+                        if (this.matrix[i][j].frontier == true) {
+                            let temp = new cords();
+                            temp.row = i;
+                            temp.col = j;
+                            frontierSet.push(temp);
+                        }
                     }
                 }
+                return frontierSet;
             }
-            shuffle(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
+            getAdjacentCellVisited(cell) {
+                let cellList = [];
+                let row = cell.row;
+                let col = cell.col;
+                if (row > 0) {
+                    let temp = new cords();
+                    temp.col = col;
+                    temp.row = row - 1;
+                    cellList.push(temp);
                 }
-                return array;
+                if (row < this.rows - 1) {
+                    let temp = new cords();
+                    temp.col = col;
+                    temp.row = row + 1;
+                    cellList.push(temp);
+                }
+                if (col < this.cols - 1) {
+                    let temp = new cords();
+                    temp.col = col + 1;
+                    temp.row = row;
+                    cellList.push(temp);
+                }
+                if (col > 0) {
+                    let temp = new cords();
+                    temp.col = col - 1;
+                    temp.row = row;
+                    cellList.push(temp);
+                }
+
+                let adjacentcells = [];
+                for (let i = 0; i < cellList.length; i++) {
+                    if (this.matrix[cellList[i].row][cellList[i].col].visited) {
+                        adjacentcells.push(cellList[i]);
+                    }
+                }
+                return adjacentcells;
             }
+            breakWall(currentCell, randomAdjacentCellVisited) {
+                let rowDiff = currentCell.row - randomAdjacentCellVisited.row;
+                let colDiff = currentCell.col - randomAdjacentCellVisited.col;
+
+                if (rowDiff === 1) {
+                    this.matrix[currentCell.row][currentCell.col].top = false;
+                    this.matrix[randomAdjacentCellVisited.row][randomAdjacentCellVisited.col].bottom = false;
+                } else if (rowDiff === -1) {
+                    this.matrix[currentCell.row][currentCell.col].bottom = false;
+                    this.matrix[randomAdjacentCellVisited.row][randomAdjacentCellVisited.col].top = false;
+                } else if (colDiff === 1) {
+                    this.matrix[currentCell.row][currentCell.col].left = false;
+                    this.matrix[randomAdjacentCellVisited.row][randomAdjacentCellVisited.col].right = false;
+                } else if (colDiff === -1) {
+                    this.matrix[currentCell.row][currentCell.col].right = false;
+                    this.matrix[randomAdjacentCellVisited.row][randomAdjacentCellVisited.col].left = false;
+                }
+            }
+
             generate() {
-                let random_point = new pair(); //creates index of a random cell each time it is executed
-                random_point.col = Math.floor(Math.random() * this.cols);
-                random_point.row = Math.floor(Math.random() * this.rows);
-                this.mat[random_point.row][random_point.col].v = 1; //first cell in the maze
-                let listValues = this.neighbors(random_point);
-
-                console.log('List Values:', listValues);
-                console.log('Length:', listValues.length);
-                let frontier = listValues; //all the neighbors of current cell
-                while (frontier.length > 0) {
-                    this.shuffle(frontier);
-                    let random_frontier_index = new pair();
-                    let index = Math.floor(Math.random() * frontier.length);
-                    random_frontier_index = frontier[index];
-                    let frontier_neighbors = this.neighbors(random_frontier_index);
+                let random_cell = new cords();
+                random_cell.row = Math.floor(Math.random() * this.rows);
+                random_cell.col = Math.floor(Math.random() * this.cols);
 
 
+                this.matrix[random_cell.row][random_cell.col].visited = true;
+                let adjacent_cells = this.adjacent_cells(random_cell);
 
-                    //continue here 26 may 2023
+                this.addToFrontier(adjacent_cells);
 
-                    console.log("random cell", random_point);
-                    console.log("frontier list", frontier);
-                    console.log("frontiner cell", random_frontier_index);
-                    console.log("frontier neighbors", frontier_neighbors);
-                    let adjacent_cell = this.getAdjacentIn(frontier_neighbors);
-                    console.log("adjacent cell", adjacent_cell);
-                    this.breakWall(random_point, random_frontier_index);
+                while (this.getFrontierSet().length > 0) {
 
+                    let frontierSet = this.getFrontierSet();
+                    let frontierCellIndex = Math.floor(Math.random() * frontierSet.length);
 
-
-
-                    //mark the frontier cell as visited using .v;
-                    this.mat[random_frontier_index.row][random_frontier_index.col].v = 1;
-
-                    //add the neighbors of random frontier cell to frontier list.
-                    this.addFrontier(frontier_neighbors, frontier);
-                    // }
-
-                    //remove the random frontier cell from the frontier list.
-                    frontier.splice(frontier.indexOf(random_frontier_index), 1);
+                    let randomFrontierCell = frontierSet[frontierCellIndex];
+                    random_cell = randomFrontierCell;
+                    this.matrix[randomFrontierCell.row][randomFrontierCell.col].frontier = false;
+                    this.matrix[randomFrontierCell.row][randomFrontierCell.col].visited = true;
 
 
-                    random_point = random_frontier_index;
+                    let adjacentCellVisitedList = this.getAdjacentCellVisited(random_cell);
+                    let randomAdjacentCellVisitedIndex = Math.floor(Math.random() * adjacentCellVisitedList.length);
+                    let randomAdjacentCellVisited = adjacentCellVisitedList[randomAdjacentCellVisitedIndex];
+
+                    this.breakWall(random_cell, randomAdjacentCellVisited);
+
+                    adjacent_cells = this.adjacent_cells(random_cell);
+                    this.addToFrontier(adjacent_cells);
+
                 }
-
             }
             display() {
-                const existingCanvas = document.querySelector('canvas');
-                if (existingCanvas) {
-                    existingCanvas.parentNode.removeChild(existingCanvas);
-                }
-                let canvas = document.createElement("canvas");
-                canvas.style.marginLeft = "25em";
-                canvas.style.marginTop = "20px";
-                canvas.width = this.cols * 20;
-                canvas.height = this.rows * 20;
-                let context = canvas.getContext("2d");
-                context.beginPath();
-
-                for (let row = 0; row < this.rows; row++) {
-                    for (let col = 0; col < this.cols; col++) {
-                        let cell = this.mat[row][col];
-
-                        if (cell.top) {
-                            context.moveTo(col * 20, row * 20);
-                            context.lineTo((col + 1) * 20, row * 20);
+                let original = document.getElementById("matrix-container");
+                for (let i = 0; i < this.rows; i++) {
+                    for (let j = 0; j < this.cols; j++) {
+                        if (!this.matrix[i][j].top) {
+                            document.getElementById(`t-data-${i}-${j}`).style.borderTop = "none";
                         }
-                        if (cell.right) {
-                            context.moveTo((col + 1) * 20, row * 20);
-                            context.lineTo((col + 1) * 20, (row + 1) * 20);
+                        if (!this.matrix[i][j].bottom) {
+                            document.getElementById(`t-data-${i}-${j}`).style.borderBottom = "none";
                         }
-                        if (cell.bottom) {
-                            context.moveTo((col + 1) * 20, (row + 1) * 20);
-                            context.lineTo(col * 20, (row + 1) * 20);
+                        if (!this.matrix[i][j].left) {
+                            document.getElementById(`t-data-${i}-${j}`).style.borderLeft = "none";
                         }
-                        if (cell.left) {
-                            context.moveTo(col * 20, (row + 1) * 20);
-                            context.lineTo(col * 20, row * 20);
+                        if (!this.matrix[i][j].right) {
+                            document.getElementById(`t-data-${i}-${j}`).style.borderRight = "none";
                         }
                     }
                 }
-
-                context.stroke();
-                document.body.appendChild(canvas);
             }
+
         }
     </script>
 </body>
