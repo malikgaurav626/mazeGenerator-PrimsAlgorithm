@@ -1,0 +1,86 @@
+input:focus {
+    outline: 2px solid white;
+    /* Desired outline style */
+}
+
+::placeholder {
+    color: white;
+    /* Desired placeholder color */
+}
+
+body {
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td {
+    border: 1px solid black;
+    padding: 5px;
+}
+
+.matrix-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 30px;
+}
+
+#table-id {
+    text-align: center;
+    border: 1px solid black;
+}
+
+.matrix {
+    margin-top: 30px;
+}
+
+#generateMazeButton {
+    border: 2px solid #a6b1e1;
+    border-radius: 5px;
+    margin-top: 20px;
+    transition: 0.2s ease-in;
+}
+
+#generateMazeButton:hover {
+    border: 2px solid white;
+    transition: 0.2s ease-out;
+}
+
+#savePdfButton {
+    border: 2px solid #a6b1e1;
+    border-radius: 5px;
+    margin-top: 20px;
+    transition: 0.2s ease-out;
+}
+
+#savePdfButton:hover {
+    border: 2px solid white;
+    transition: 0.2s ease-in;
+}
+
+@media (max-width: 566px) {
+    .matrix {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .matrix label,
+    .matrix input {
+        display: block;
+        margin-bottom: 1em;
+    }
+
+    #generateMazeButton {
+        margin-top: -20px;
+    }
+
+    #savePdfButton {
+        margin-top: -20px;
+    }
+}
